@@ -53,38 +53,7 @@ $$\max_{y, X} \quad \sum_{(i,j) \in E} (R - c_{ij}) X_{ij} - \sum_{j \in J} F_j 
 
 ---
 
-## 💻 Local Setup & Execution
 
-1. **Install Dependencies**:
-   ```bash
-   pip install -r requirements.txt
-   ```
 
-2. **Launch Streamlit Web App**:
-   ```bash
-   streamlit run app.py
-   ```
-   Open your browser at `http://localhost:8501`.
 
----
-
-## 🚀 Deployment on Streamlit Community Cloud (`https://share.streamlit.io`)
-
-1. **Initialize Git & Push to GitHub**:
-   ```bash
-   git init
-   git add .
-   git commit -m "Dark Store Location Optimizer with Chennai Geography"
-   git branch -M main
-   git remote add origin https://github.com/<your-username>/<your-repo-name>.git
-   git push -u origin main
-   ```
-
-2. **Deploy via Streamlit Cloud**:
-   - Go to [https://share.streamlit.io](https://share.streamlit.io) and log in with your GitHub account.
-   - Click **"New app"**.
-   - Select your repository, branch (`main`), and set Main file path to `app.py`.
-   - Click **"Deploy!"**.
-   - Your public application URL will be:
-     `https://<your-app-name>.streamlit.app`
 
