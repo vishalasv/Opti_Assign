@@ -94,7 +94,7 @@ max_dist_km = st.sidebar.slider(
 st.sidebar.subheader("💰 Economics & Capacities")
 col_s1, col_s2 = st.sidebar.columns(2)
 with col_s1:
-    fixed_cost = st.number_input("Fixed Cost (₹/store)", min_value=500.0, max_value=20000.0, value=3500.0, step=250.0)
+    fixed_cost = st.number_input("Fixed Cost (₹/store)", min_value=500.0, max_value=10000000.0, value=3500.0, step=250.0)
     cost_per_km = st.number_input("Transport Cost (₹/km)", min_value=1.0, max_value=30.0, value=5.0, step=0.5)
 with col_s2:
     store_cap = st.number_input("Store Capacity (orders)", min_value=50, max_value=3000, value=350, step=25)
@@ -400,7 +400,7 @@ with tab2:
     with col_f4:
         f_rev = st.number_input("Revenue/Order (₹)", min_value=50.0, max_value=500.0, value=180.0, step=10.0)
     with col_f5:
-        f_fixed = st.number_input("Store Fixed Cost (₹)", min_value=1000.0, max_value=10000.0, value=4000.0, step=500.0)
+        f_fixed = st.number_input("Store Fixed Cost (₹)", min_value=1000.0, max_value=10000000.0, value=4000.0, step=500.0)
 
     @st.cache_data(show_spinner=False)
     def compute_cached_frontier(n_c: int, n_s: int, max_d: float, rev: float, f_cost: float, seed: int):
