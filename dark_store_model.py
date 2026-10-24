@@ -297,3 +297,4 @@ def run_frontier_analysis(
             })
 
     return pd.DataFrame(results)
+

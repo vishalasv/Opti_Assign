@@ -78,8 +78,8 @@ st.markdown(
 st.sidebar.header("⚙️ Model Parameters")
 
 st.sidebar.subheader("📍 Geography & Network")
-n_stores = st.sidebar.slider("Candidate Dark Stores", min_value=4, max_value=40, value=12, step=1)
-n_customers = st.sidebar.slider("Customer Count (Interactive Map)", min_value=10, max_value=800, value=150, step=10)
+n_stores = st.sidebar.slider("Candidate Dark Stores", min_value=4, max_value=60, value=15, step=1)
+n_customers = st.sidebar.slider("Customer Count (Simulation & Map)", min_value=10, max_value=15000, value=250, step=50)
 
 st.sidebar.subheader("📏 Maximum Distance Constraint")
 max_dist_km = st.sidebar.slider(
@@ -137,17 +137,24 @@ with tab1:
         base_capacity=store_cap,
     )
 
+    # For large customer counts (> 800), use micro-clustering for instant solver performance
+    if n_customers > 800:
+        from geo_utils import aggregate_customers_for_scale
+        df_cust_solver = aggregate_customers_for_scale(df_cust_gen, grid_size_deg=0.012)
+    else:
+        df_cust_solver = df_cust_gen
+
     # 2. Solve Optimization
-    with st.spinner("Solving Dark Store Optimization with Google OR-Tools (SCIP)..."):
+    with st.spinner(f"Solving Dark Store Optimization for {n_customers:,} customers across {n_stores} candidate stores..."):
         sol = solve_dark_store_optimization(
             df_stores=df_stores_gen,
-            df_customers=df_cust_gen,
+            df_customers=df_cust_solver,
             max_distance_km=max_dist_km,
             cost_per_km=cost_per_km,
             revenue_per_order=rev_per_order,
             max_open_stores=max_k,
             enforce_full_demand=enforce_demand,
-            time_limit_sec=15,
+            time_limit_sec=20,
         )
 
     if not sol["success"]:
@@ -258,7 +265,10 @@ with tab1:
             # Plot Customers and Delivery Connections
             served_cust_ids = set()
             if not df_allocs.empty:
-                for _, alloc in df_allocs.iterrows():
+                # Sample up to 250 allocations for smooth Folium map rendering
+                sample_allocs = df_allocs.sample(min(250, len(df_allocs)), random_state=42) if len(df_allocs) > 250 else df_allocs
+
+                for _, alloc in sample_allocs.iterrows():
                     c_id = int(alloc["customer_id"])
                     s_id = int(alloc["store_id"])
                     served_cust_ids.add(c_id)
@@ -285,10 +295,16 @@ with tab1:
                         tooltip=f"Customer {c_id}: {alloc['volume']} orders from {alloc['store_name']}",
                     ).add_to(m)
 
-            # Unserved Customers
-            for _, cust in df_cust_gen.iterrows():
-                c_id = int(cust["customer_id"])
-                if c_id not in served_cust_ids:
+            # Unserved Customers (display representative sample if large)
+            unserved_custs = [cust for _, cust in df_cust_gen.iterrows() if int(cust["customer_id"]) not in served_cust_ids]
+            if len(unserved_custs) > 80:
+                unserved_sample = pd.DataFrame(unserved_custs).sample(80, random_state=42)
+            else:
+                unserved_sample = pd.DataFrame(unserved_custs)
+
+            if not unserved_sample.empty:
+                for _, cust in unserved_sample.iterrows():
+                    c_id = int(cust["customer_id"])
                     folium.CircleMarker(
                         location=[cust["lat"], cust["lon"]],
                         radius=4,
@@ -300,6 +316,8 @@ with tab1:
                     ).add_to(m)
 
             st_folium(m, width="100%", height=550)
+            if len(df_allocs) > 250:
+                st.caption(f"ℹ️ Displaying representative sample of 250 customer delivery routes (out of {len(df_allocs):,} total allocations) for smooth map performance.")
 
         with col_table:
             st.markdown("#### 🏪 Candidate Store Utilization")
@@ -364,27 +382,31 @@ with tab1:
 # TAB 2: Profit Frontier (10,000 Customers & 50 Dark Stores)
 # -----------------------------------------------------------------------------
 with tab2:
-    st.markdown("### 📈 Profit Frontier for 10,000 Customers & 50 Dark Store Candidates")
+    st.markdown("### 📈 Profit Frontier for Up to 15,000 Customers & 60 Dark Stores")
     st.markdown(
         r"""
         > **Scenario Objective**: Evaluate total profit when up to at most **2, 5, 10, 20, 25** dark store locations
-        are allowed to open across Chennai for **10,000 customer demand points** under the maximum delivery distance constraint ($d_{ij} \le D_{\max}$).
+        are allowed to open across Chennai for up to **15,000 customers and 60 dark store candidates** under the maximum delivery distance constraint ($d_{ij} \le D_{\max}$).
         """
     )
 
-    col_f1, col_f2, col_f3 = st.columns(3)
+    col_f1, col_f2, col_f3, col_f4, col_f5 = st.columns(5)
     with col_f1:
-        f_max_dist = st.slider("Frontier Max Distance (km)", min_value=3.0, max_value=15.0, value=8.0, step=0.5)
+        f_customers = st.slider("Customers", min_value=1000, max_value=15000, value=15000, step=1000)
     with col_f2:
-        f_rev = st.number_input("Frontier Revenue/Order (₹)", min_value=50.0, max_value=500.0, value=180.0, step=10.0)
+        f_stores = st.slider("Candidate Stores", min_value=10, max_value=60, value=60, step=5)
     with col_f3:
-        f_fixed = st.number_input("Frontier Store Fixed Cost (₹)", min_value=1000.0, max_value=10000.0, value=4000.0, step=500.0)
+        f_max_dist = st.slider("Max Distance (km)", min_value=3.0, max_value=15.0, value=8.0, step=0.5)
+    with col_f4:
+        f_rev = st.number_input("Revenue/Order (₹)", min_value=50.0, max_value=500.0, value=180.0, step=10.0)
+    with col_f5:
+        f_fixed = st.number_input("Store Fixed Cost (₹)", min_value=1000.0, max_value=10000.0, value=4000.0, step=500.0)
 
     @st.cache_data(show_spinner=False)
-    def compute_cached_frontier(max_d: float, rev: float, f_cost: float, seed: int):
+    def compute_cached_frontier(n_c: int, n_s: int, max_d: float, rev: float, f_cost: float, seed: int):
         return run_frontier_analysis(
-            n_customers=10000,
-            n_stores=50,
+            n_customers=n_c,
+            n_stores=n_s,
             k_values=[2, 5, 10, 20, 25],
             max_distance_km=max_d,
             revenue_per_order=rev,
@@ -392,8 +414,8 @@ with tab2:
             random_seed=seed,
         )
 
-    with st.spinner("Optimizing 10,000 customers across 50 candidate locations for K in [2, 5, 10, 20, 25]..."):
-        df_frontier = compute_cached_frontier(f_max_dist, f_rev, f_fixed, random_seed)
+    with st.spinner(f"Optimizing {f_customers:,} customers across {f_stores} candidate locations for K in [2, 5, 10, 20, 25]..."):
+        df_frontier = compute_cached_frontier(f_customers, f_stores, f_max_dist, f_rev, f_fixed, random_seed)
 
     # 1. Dual-Axis Plotly Chart: Profit and Fulfillment Rate vs K
     fig = make_subplots(specs=[[{"secondary_y": True}]])

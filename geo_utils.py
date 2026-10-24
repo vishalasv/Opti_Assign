@@ -171,3 +171,4 @@ def aggregate_customers_for_scale(
     agg["demand"] = agg["total_demand"]
 
     return agg
+

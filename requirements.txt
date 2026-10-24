@@ -6,3 +6,4 @@ plotly>=5.20
 folium>=0.16
 streamlit-folium>=0.20
 scipy>=1.13
+
