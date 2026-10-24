@@ -117,11 +117,10 @@ random_seed = st.sidebar.number_input("Random Seed", min_value=1, max_value=9999
 # -----------------------------------------------------------------------------
 # Main Tabs
 # -----------------------------------------------------------------------------
-tab1, tab2, tab3, tab4 = st.tabs([
+tab1, tab2, tab3 = st.tabs([
     "📍 Interactive Chennai Map & KPIs",
     "📈 Profit Frontier (10,000 Customers & 50 Stores)",
     "📐 Mathematical Model & Constraints",
-    "🚀 Deployment Guide",
 ])
 
 # -----------------------------------------------------------------------------
@@ -582,40 +581,5 @@ with tab3:
 
         #### 5. Objective Function (Profit Maximization)
         $$\max_{y, X} \quad \sum_{(i,j) \in E} (R - c_{ij}) X_{ij} - \sum_{j \in J} F_j y_j$$
-        """
-    )
-
-
-# -----------------------------------------------------------------------------
-# TAB 4: Deployment Guide
-# -----------------------------------------------------------------------------
-with tab4:
-    st.markdown("### 🚀 Deployment to Streamlit Community Cloud (`https://share.streamlit.io`)")
-    st.markdown(
-        """
-        Follow these steps to deploy this application to **Streamlit Community Cloud**:
-
-        1. **Push your code to GitHub**:
-           Make sure your repository contains:
-           - `app.py` (Main Streamlit app)
-           - `dark_store_model.py` (MILP Optimization engine)
-           - `geo_utils.py` (Chennai geography and distance utilities)
-           - `requirements.txt` (Dependencies)
-
-        2. **Log into Streamlit Community Cloud**:
-           Visit [https://share.streamlit.io](https://share.streamlit.io) and sign in using your GitHub account.
-
-        3. **Deploy New App**:
-           - Click the **'New app'** button.
-           - Select your GitHub repository (e.g. `your-username/chennai-darkstore-optimizer`).
-           - Set the Branch to `main`.
-           - Set the Main file path to `app.py`.
-           - Click **'Deploy!'**.
-
-        4. **Your Live Public Link**:
-           Streamlit will automatically build your environment and provide a permanent public link:
-           ```text
-           https://<your-app-name>.streamlit.app
-           ```
         """
     )
