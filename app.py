@@ -15,6 +15,9 @@ from streamlit_folium import st_folium
 from geo_utils import generate_chennai_data
 from dark_store_model import solve_dark_store_optimization, run_frontier_analysis
 
+# CARTO Basemaps API Key
+CARTO_API_KEY = "cb1_4u22_1_1b47d64c808e01f332885e8e"
+
 # -----------------------------------------------------------------------------
 # Page Configuration
 # -----------------------------------------------------------------------------
@@ -195,7 +198,17 @@ with tab1:
 
             # Center map on Chennai
             chennai_center = [13.045, 80.225]
-            m = folium.Map(location=chennai_center, zoom_start=11, tiles="CartoDB positron")
+            carto_tile_url = f"https://{{s}}.basemaps.cartocdn.com/light_all/{{z}}/{{x}}/{{y}}.png?key={CARTO_API_KEY}"
+            carto_attr = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+
+            m = folium.Map(location=chennai_center, zoom_start=11, tiles=None)
+            folium.TileLayer(
+                tiles=carto_tile_url,
+                attr=carto_attr,
+                name="CartoDB Positron",
+                subdomains="abcd",
+                max_zoom=20,
+            ).add_to(m)
 
             # Store palette for coloring customer allocation lines
             color_palette = [
