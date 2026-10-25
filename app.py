@@ -523,21 +523,7 @@ with tab2:
             height=320,
         )
 
-    # 3. Managerial Insights Callout
-    st.markdown("---")
-    st.markdown("### 💡 Key Managerial Takeaways & Sweet-Spot Analysis")
-    max_profit_row = df_frontier.loc[df_frontier["Net Profit (₹)"].idxmax()]
-    best_k = int(max_profit_row["Allowed Stores (K)"])
-    best_profit = max_profit_row["Net Profit (₹)"]
-    best_fulfillment = max_profit_row["Fulfillment Rate (%)"]
 
-    st.success(
-        f"""
-        - **Optimal Sweet Spot**: Maximum profit is achieved around **K = {best_k} stores**, yielding **₹{best_profit:,.0f} in Net Profit** with **{best_fulfillment:.1f}% fulfillment**.
-        - **Diminishing Marginal Returns**: Going from **K = 2 &rarr; 5 &rarr; 10** produces dramatic revenue and profit jumps because dense customer clusters in Chennai (T. Nagar, Velachery, OMR, Anna Nagar) are covered.
-        - **Saturation Effect**: Moving from **K = 20 &rarr; 25** provides small incremental demand coverage (~91% &rarr; ~100%), but additional fixed costs reduce or flatten marginal profit. Opening between 18 to 22 dark stores represents the optimal economic trade-off.
-        """
-    )
 
 
 # -----------------------------------------------------------------------------
